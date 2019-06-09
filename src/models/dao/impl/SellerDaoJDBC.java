@@ -57,7 +57,7 @@ public class SellerDaoJDBC implements SellerDAO {
 			Seller seller = null;
 			
 			while(rs.next()) {
-				seller = this.createEntity(rs);
+				seller = this.createEntitySeller(rs);
 			}
 			
 			return seller;
@@ -78,29 +78,22 @@ public class SellerDaoJDBC implements SellerDAO {
 		return null;
 	}
 	
-	private Seller createEntity(ResultSet rs) {
-		try {
-			Seller seller = new Seller();
-			
-			seller.setId(rs.getInt("id"));
-			seller.setName(rs.getString("name"));
-			seller.setBirthDate(rs.getDate("birthDate"));
-			seller.setEmail(rs.getString("email"));
-			seller.setBaseSalary(rs.getDouble("baseSalary"));
-			
-			Department department = new Department();
-			department.setId(rs.getInt("department"));
-			department.setName(rs.getString("depName"));
-			
-			seller.setDepartment(department);
-			
-			return seller;
-			
-		} catch(SQLException e) {
-			e.printStackTrace();
-		}
+	private Seller createEntitySeller(ResultSet rs) throws SQLException {
 		
-		return null;
+		Seller seller = new Seller();
+		
+		seller.setId(rs.getInt("id"));
+		seller.setName(rs.getString("name"));
+		seller.setBirthDate(rs.getDate("birthDate"));
+		seller.setEmail(rs.getString("email"));
+		seller.setBaseSalary(rs.getDouble("baseSalary"));	
+		seller.setDepartment(this.createEntityDepartment(rs));
+		
+		return seller;
+	}
+	
+	private Department createEntityDepartment(ResultSet rs) throws SQLException {
+		return new Department(rs.getInt("department"), rs.getString("depName"));
 	}
 
 }
