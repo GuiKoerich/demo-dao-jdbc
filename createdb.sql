@@ -11,8 +11,8 @@ create table if not exists seller (
     email varchar(200) not null,
     birthDate timestamp not null,
     baseSalary float not null,
-    department int not null,
+    departmentId int not null,
 
-    constraint seller_department_fkey foreign key (department) references department(id) match simple 
+    constraint seller_department_fkey foreign key (departmentId) references department(id) match simple 
     on update no action on delete no action
 );
