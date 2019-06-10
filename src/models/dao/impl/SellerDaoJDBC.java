@@ -12,6 +12,7 @@ import java.util.Map;
 
 import db.DB;
 import db.exceptions.DbException;
+import db.exceptions.DbIntegrityException;
 import models.dao.SellerDAO;
 import models.entities.Department;
 import models.entities.Seller;
@@ -29,8 +30,8 @@ public class SellerDaoJDBC implements SellerDAO {
 		PreparedStatement ps = null;
 		try {
 			
-			String sql = "INSERT INTO seller (name, email, birthDate, baseSalary, departmentId) "
-					+ "VALUES (?, ?, ?, ?, ?)";
+			String sql = "INSERT INTO seller(name, email, birthDate, baseSalary, departmentId) "
+					+ "VALUES(?, ?, ?, ?, ?)";
 			
 			ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 			
@@ -69,7 +70,7 @@ public class SellerDaoJDBC implements SellerDAO {
 			String sql = "UPDATE seller set name = ?, email = ?, birthDate = ?, baseSalary = ?, departmentId = ? "
 					+ "WHERE id = ?";
 			
-			ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+			ps = conn.prepareStatement(sql);
 			
 			this.prepareInfos(obj, ps, true);
 			
@@ -84,8 +85,21 @@ public class SellerDaoJDBC implements SellerDAO {
 
 	@Override
 	public void deleteById(Integer id) {
-		// TODO Auto-generated method stub
-		
+		PreparedStatement ps = null;
+		try {
+			
+			String sql = "DELETE FROM seller WHERE id = ?";
+			
+			ps = conn.prepareStatement(sql);
+			ps.setInt(1, id);
+			
+			ps.executeUpdate();
+			
+		} catch(SQLException e) {
+			throw new DbIntegrityException(e.getMessage());
+		} finally {
+			DB.closeStatement(ps);
+		}
 	}
 
 	@Override
