@@ -16,3 +16,5 @@ create table if not exists seller (
     constraint seller_department_fkey foreign key (departmentId) references department(id) match simple 
     on update no action on delete no action
 );
+
+INSERT INTO department VALUES (1, 'Computers'), (2, 'Eletronics'), (3, 'Fashion'), (4, 'Books');

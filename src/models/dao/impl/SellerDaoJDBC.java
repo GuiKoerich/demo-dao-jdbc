@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,14 +26,60 @@ public class SellerDaoJDBC implements SellerDAO {
 
 	@Override
 	public void insert(Seller obj) {
-		// TODO Auto-generated method stub
-		
+		PreparedStatement ps = null;
+		try {
+			
+			String sql = "INSERT INTO seller (name, email, birthDate, baseSalary, departmentId) "
+					+ "VALUES (?, ?, ?, ?, ?)";
+			
+			ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+			
+			this.prepareInfos(obj, ps, false);
+			
+			int rowsAffected = ps.executeUpdate();
+			
+			if(rowsAffected > 0) {
+				ResultSet rs = ps.getGeneratedKeys();
+				
+				while(rs.next()) {
+					int id = rs.getInt(1);
+					obj.setId(id);
+				}
+				
+				DB.closeResultSet(rs);
+				
+			} else {
+				throw new DbException("Unexpected Error! No rows affected!");
+			}
+			
+			
+			
+		} catch(SQLException e) {
+			throw new DbException(e.getMessage());
+		} finally {
+			DB.closeStatement(ps);
+		}
 	}
 
 	@Override
 	public void update(Seller obj) {
-		// TODO Auto-generated method stub
-		
+		PreparedStatement ps = null;
+		try {
+			
+			String sql = "UPDATE seller set name = ?, email = ?, birthDate = ?, baseSalary = ?, departmentId = ? "
+					+ "WHERE id = ?";
+			
+			ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+			
+			this.prepareInfos(obj, ps, true);
+			
+			ps.executeUpdate();
+			
+		} catch(SQLException e) {
+			throw new DbException(e.getMessage());
+		} finally {
+			DB.closeStatement(ps);
+		}
 	}
 
 	@Override
@@ -175,5 +222,18 @@ public class SellerDaoJDBC implements SellerDAO {
 	private Department createEntityDepartment(ResultSet rs) throws SQLException {
 		return new Department(rs.getInt("departmentId"), rs.getString("depName"));
 	}
-
+	
+	private void prepareInfos(Seller obj, PreparedStatement ps, Boolean update) throws SQLException {
+		
+		ps.setString(1, obj.getName());
+		ps.setString(2, obj.getEmail());
+		ps.setDate(3, new java.sql.Date(obj.getBirthDate().getTime()));
+		ps.setDouble(4, obj.getBaseSalary());
+		ps.setInt(5, obj.getDepartment().getId());
+		
+		if(update) {
+			ps.setInt(6, obj.getId());
+		}
+		
+	}
 }
